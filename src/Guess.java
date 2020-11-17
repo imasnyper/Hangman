@@ -37,8 +37,8 @@ public class Guess {
     }
 
     public boolean guessed(char c, ArrayList<Guess> allGuesses) {
-        for(Guess g: allGuesses) {
-            if(c == g.guess) {
+        for (Guess g : allGuesses) {
+            if (c == g.guess) {
                 return true;
             }
         }

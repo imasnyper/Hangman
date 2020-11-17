@@ -96,9 +96,9 @@ public class Main {
     public static int getCorrectChars(String word, ArrayList<Guess> allGuesses) {
         int correctChars = 0;
 
-        for(Guess g: getGuesses(true, allGuesses)) {
-            for(char c: word.toCharArray()) {
-                if(g.guess == c) {
+        for (Guess g : getGuesses(true, allGuesses)) {
+            for (char c : word.toCharArray()) {
+                if (g.guess == c) {
                     correctChars++;
                 }
             }
@@ -145,14 +145,14 @@ public class Main {
 
     public static ArrayList<Guess> getGuesses(boolean correct, ArrayList<Guess> guesses) {
         ArrayList<Guess> vals = new ArrayList<>();
-        if(correct) {
-            for(Guess guess: guesses) {
+        if (correct) {
+            for (Guess guess : guesses) {
                 if (guess.correct) {
                     vals.add(guess);
                 }
             }
         } else {
-            for(Guess guess: guesses) {
+            for (Guess guess : guesses) {
                 if (!guess.correct) {
                     vals.add(guess);
                 }
