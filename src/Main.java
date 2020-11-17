@@ -25,7 +25,7 @@ public class Main {
                 inputWord = scnr.nextLine();
             }
 
-            Word word = new Word(inputWord);
+            String word = inputWord;
 
             run(word, record);
 
@@ -36,11 +36,11 @@ public class Main {
             }
         } while (playAgain);
 
-        System.out.println("\n\n\n\n\n\n\n\n\n\n");
+        System.out.println("\n\n\n\n");
         System.out.println("Thank you for playing!");
         System.out.println("Your final score was: ");
         System.out.printf("Wins: %d\tLosses: %d\n", record.wins, record.losses);
-        System.out.println("\n\n\n\n\n\n\n");
+        System.out.println("\n\n\n");
     }
 
     public static String randomWord() {
@@ -64,64 +64,55 @@ public class Main {
         return wordList.get(randomIndex);
     }
 
-    public static void run(Word word, Record record) {
-        char guess;
+    public static void run(String word, Record record) {
         int lives = 5;
         boolean gameWon;
+        ArrayList<Guess> allGuesses = new ArrayList<>();
 
         do {
-            printGameInfo(word, lives, record);
+            Guess guess = new Guess();
+            printGameInfo(word, allGuesses, lives, record);
 
-            guess = getGuess(word);
+            guess.getGuess(word, allGuesses);
+            allGuesses.add(guess);
 
-            String strGuess = Character.toString(guess);
-            word.guessedChars.add(guess);
-
-            if (word.word.contains(strGuess)) {
-                word.correctChars.add(guess);
-                word.setTotalCorrectChars(guess);
-            } else {
+            if (!word.contains(guess.strGuess())) {
                 lives--;
-                word.incorrectChars.add(guess);
             }
-            gameWon = word.word.length() == word.totalCorrectChars;
-        } while (guess != '!' && !gameWon && lives > 0);
 
-        printGameInfo(word, lives, record);
+            gameWon = word.length() == getCorrectChars(word, allGuesses);
+        } while (!gameWon && lives > 0);
+
+        printGameInfo(word, allGuesses, lives, record);
         if (gameWon) {
             System.out.println("Congrats!! You Win!!");
             record.incrementWins();
         } else {
-            System.out.println("You lose :(. The word was " + word.word);
+            System.out.println("You lose :(. The word was " + word);
             record.incrementLosses();
         }
     }
 
-    public static char getGuess(Word word) {
-        Scanner scnr = new Scanner(System.in);
-        char guess;
+    public static int getCorrectChars(String word, ArrayList<Guess> allGuesses) {
+        int correctChars = 0;
 
-        do {
-            System.out.print("Enter a character to guess: ");
-            String guessInput = scnr.nextLine();
-            guess = guessInput.charAt(0);
-            if (word.charGuessed(guess)) {
-                System.out.println("Already guessed " + guess + ".");
+        for(Guess g: getGuesses(true, allGuesses)) {
+            for(char c: word.toCharArray()) {
+                if(g.guess == c) {
+                    correctChars++;
+                }
             }
-        } while (word.charGuessed(guess));
+        }
 
-        word.guessCount++;
-
-        return guess;
+        return correctChars;
     }
 
-    public static void printGameInfo(Word word, int lives, Record record) {
-        System.out.println("\n\n\n\n\n\n\n");
+    public static void printGameInfo(String word, ArrayList<Guess> allGuesses, int lives, Record record) {
+        System.out.println("\n\n\n\n");
         System.out.printf("Wins: %d\tLosses: %d\n", record.wins, record.losses);
-        System.out.println("Word length: " + word.word.length());
         printHangman(lives);
-        printBoard(word);
-        printGuessedChars(word);
+        printBoard(word, allGuesses);
+        printGuessedChars(allGuesses);
         System.out.println();
     }
 
@@ -136,12 +127,12 @@ public class Main {
         }
     }
 
-    public static void printBoard(Word word) {
-        for (int i = 0; i < word.word.length(); i++) {
+    public static void printBoard(String word, ArrayList<Guess> allGuesses) {
+        for (int i = 0; i < word.length(); i++) {
             boolean charGuessed = false;
-            for (int j = 0; j < word.correctChars.size(); j++) {
-                if (word.word.charAt(i) == word.correctChars.get(j)) {
-                    System.out.print(word.word.charAt(i) + " ");
+            for (int j = 0; j < getGuesses(true, allGuesses).size(); j++) {
+                if (word.charAt(i) == getGuesses(true, allGuesses).get(j).guess) {
+                    System.out.print(word.charAt(i) + " ");
                     charGuessed = true;
                 }
             }
@@ -152,31 +143,38 @@ public class Main {
         System.out.println();
     }
 
-    public static void printGuessedChars(Word word) {
+    public static ArrayList<Guess> getGuesses(boolean correct, ArrayList<Guess> guesses) {
+        ArrayList<Guess> vals = new ArrayList<>();
+        if(correct) {
+            for(Guess guess: guesses) {
+                if (guess.correct) {
+                    vals.add(guess);
+                }
+            }
+        } else {
+            for(Guess guess: guesses) {
+                if (!guess.correct) {
+                    vals.add(guess);
+                }
+            }
+        }
+        return vals;
+    }
+
+    public static void printGuessedChars(ArrayList<Guess> allGuesses) {
         System.out.print("Guesses: ");
-        for (int i = 0; i < word.guessedChars.size(); i++) {
-            System.out.print(word.guessedChars.get(i));
-            if (i < word.guessedChars.size() - 1) {
-                System.out.print(", ");
+        for (int i = 0; i < allGuesses.size(); i++) {
+            Guess guess = allGuesses.get(i);
+            if (guess.correct) {
+                System.out.print(ConsoleColor.Color.BLUE_BOLD);
+                System.out.print(guess.guess);
+                System.out.print(ConsoleColor.Color.RESET);
+            } else {
+                System.out.print(ConsoleColor.Color.RED_BOLD);
+                System.out.print(guess.guess);
+                System.out.print(ConsoleColor.Color.RESET);
             }
-        }
-        System.out.println();
-
-        System.out.print("Incorrect Characters: ");
-        int incorrectLength = word.incorrectChars.size();
-        for (int i = 0; i < incorrectLength; i++) {
-            System.out.print(word.incorrectChars.get(i));
-            if (i < incorrectLength - 1) {
-                System.out.print(", ");
-            }
-        }
-        System.out.println();
-
-        System.out.print("Correct Characters: ");
-        int correctLength = word.correctChars.size();
-        for (int i = 0; i < correctLength; i++) {
-            System.out.print(word.correctChars.get(i));
-            if (i < correctLength - 1) {
+            if (i < allGuesses.size() - 1) {
                 System.out.print(", ");
             }
         }
