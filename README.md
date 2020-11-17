@@ -1,8 +1,8 @@
-#Hangman
+# Hangman
 
 requires Java 13+ (Text Blocks)
 
-##Usage
+## Usage
 1. Compile Java file
 1. To use a random word from the word list:
     1. run with -r command line argument.
