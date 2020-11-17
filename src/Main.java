@@ -18,8 +18,7 @@ public class Main {
                 if (args[0].equals("-r")) {
                     inputWord = randomWord();
                 } else {
-                    System.out.println("Enter a word for guessing: ");
-                    inputWord = scnr.nextLine();
+                    inputWord = args[0];
                 }
             } else {
                 System.out.println("Enter a word for guessing: ");
